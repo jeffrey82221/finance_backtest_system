@@ -1,0 +1,6 @@
+yfinance==0.2.61
+tti==0.2.2
+backtesting==0.6.4
+pandas_datareader
+matplotlib
+vectorbt
