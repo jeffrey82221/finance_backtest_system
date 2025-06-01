@@ -40,6 +40,33 @@ def assert_data_type_consistency(default_stock_data: pd.DataFrame, custom_stock_
     assert set(default_stock_data.columns) == set(custom_stock_data.columns), "DataFrames have different columns"
     assert default_stock_data.dtypes.equals(custom_stock_data.dtypes), "DataFrames have different data types"
 
+def plot_and_compare_stock_data(default_stock_data: pd.DataFrame, custom_stock_data: pd.DataFrame):
+    """
+    Plot stock data for comparison.
+    
+    :param default_stock_data: Default stock data DataFrame.
+    :param custom_stock_data: Custom stock data DataFrame.
+    """
+    default_stock_data_first = default_stock_data['Open'].iloc[0]
+    custom_stock_data_first = custom_stock_data['Open'].iloc[0]
+
+    for col in ['Open', 'High', 'Low', 'Close']:
+        default_stock_data[col] = default_stock_data[col] / default_stock_data_first
+        custom_stock_data[col] = custom_stock_data[col] / custom_stock_data_first
+        
+    print('Default stock data:', default_stock_data)
+    print('Custom stock data:', custom_stock_data)
+
+    # Plot the open price of the default against that of the custom stock data
+    default_stock_data['Open'].plot(label='Default Google Open Price')
+    custom_stock_data['Open'].plot(label='Custom Google Open Price')
+    import matplotlib.pyplot as plt
+    plt.legend()
+    plt.title('Open Price Comparison')
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.show()
+
 google_data = import_default_stock_data()
 # get start date of the google data
 start_date = google_data.index.min().strftime('%Y-%m-%d')
@@ -60,23 +87,6 @@ assert_data_type_consistency(
 
 # Normalized the google_data to the same scale as the downloaded data
 # Only normalized the price related columns use for loops to avoid hardcoding column names
-
-google_open = google_data['Open'].iloc[0]
-downloaded_google_open = downloaded_google_data['Open'].iloc[0]
-
-for col in ['Open', 'High', 'Low', 'Close']:
-    google_data[col] = google_data[col] / google_open
-    downloaded_google_data[col] = downloaded_google_data[col] / downloaded_google_open
-    
-print('Default stock data:', google_data)
-print('Custom stock data:', downloaded_google_data)
-
-# Plot the open price of the default against that of the custom stock data
-google_data['Open'].plot(label='Default Google Open Price')
-downloaded_google_data['Open'].plot(label='Custom Google Open Price')
-import matplotlib.pyplot as plt
-plt.legend()
-plt.title('Google Open Price Comparison')
-plt.xlabel('Date')
-plt.ylabel('Price')
-plt.show()
+plot_and_compare_stock_data(
+    google_data.copy(), downloaded_google_data.copy()
+)
