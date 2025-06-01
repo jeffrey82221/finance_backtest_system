@@ -5,3 +5,5 @@ backtrader==1.9.78
 pandas_datareader
 matplotlib
 vectorbt
+pandas-ta
+ta

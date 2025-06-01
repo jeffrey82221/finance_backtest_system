@@ -67,26 +67,27 @@ def plot_and_compare_stock_data(default_stock_data: pd.DataFrame, custom_stock_d
     plt.ylabel('Price')
     plt.show()
 
-google_data = import_default_stock_data()
-# get start date of the google data
-start_date = google_data.index.min().strftime('%Y-%m-%d')
-# get end date + one day of the google data
-end_date = (google_data.index.max() + pd.Timedelta(days=1)).strftime('%Y-%m-%d')
+if __name__ == "__main__":
+    google_data = import_default_stock_data()
+    # get start date of the google data
+    start_date = google_data.index.min().strftime('%Y-%m-%d')
+    # get end date + one day of the google data
+    end_date = (google_data.index.max() + pd.Timedelta(days=1)).strftime('%Y-%m-%d')
 
-downloaded_google_data = import_custom_stock_data('GOOG', start_date, end_date)
+    downloaded_google_data = import_custom_stock_data('GOOG', start_date, end_date)
 
 
-print('Default stock data:', google_data)
-print('Custom stock data:', downloaded_google_data)
+    print('Default stock data:', google_data)
+    print('Custom stock data:', downloaded_google_data)
 
-assert_data_type_consistency(
-    google_data, downloaded_google_data
-)
+    assert_data_type_consistency(
+        google_data, downloaded_google_data
+    )
 
-# NOTE: Check by normalizing the data
+    # NOTE: Check by normalizing the data
 
-# Normalized the google_data to the same scale as the downloaded data
-# Only normalized the price related columns use for loops to avoid hardcoding column names
-plot_and_compare_stock_data(
-    google_data.copy(), downloaded_google_data.copy()
-)
+    # Normalized the google_data to the same scale as the downloaded data
+    # Only normalized the price related columns use for loops to avoid hardcoding column names
+    plot_and_compare_stock_data(
+        google_data.copy(), downloaded_google_data.copy()
+    )
