@@ -45,7 +45,7 @@ print(GOOG.head())
 print(GOOG.index.map(str)[-1])
 GOOG = GOOG * 10 ** -6 # Scale down the data for buying micro shares
 bt = Backtest(
-    GOOG, DCA, trade_on_close=True
+    GOOG, DCA, trade_on_close=False
     )
 stats: backtesting._stats._Stats = bt.run()
 print(stats)
