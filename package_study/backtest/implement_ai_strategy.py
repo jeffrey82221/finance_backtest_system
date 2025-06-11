@@ -22,7 +22,9 @@ def adapt_ta(pandas_ta_func):
             volume=data.Volume.s,
             open=data.Open.s,
             **kwargs)
-        result = ic(signals.to_numpy().T)
+        result = signals.to_numpy().T
+        if len(result.shape) > 1:
+            result = result[kwargs['output_idx']] 
         return result
     return wrapper
 
@@ -35,7 +37,7 @@ class MacdRsiKdjStrategy(Strategy):
 
     def init(self):
         self.macd_hist = self.I(
-            partial(adapt_ta(ta.macd), fast=12, slow=26, signal=9), 
+            partial(adapt_ta(ta.macd), fast=12, slow=26, signal=9, output_idx=1), 
             self.data, 
             overlay=True
         )
@@ -44,14 +46,21 @@ class MacdRsiKdjStrategy(Strategy):
             self.data, 
             overlay=True
         )
-        self.kdj = self.I(
-            partial(adapt_ta(ta.kdj), length=9, signal=3), 
+        self.k = self.I(
+            partial(adapt_ta(ta.kdj), length=9, signal=3, output_idx=0), 
             self.data, 
             overlay=True
         )
-        self.k = self.kdj[0]  # K 線
-        self.d = self.kdj[1]
-        self.j = self.kdj[2]
+        self.d = self.I(
+            partial(adapt_ta(ta.kdj), length=9, signal=3, output_idx=1), 
+            self.data, 
+            overlay=True
+        )
+        self.j = self.I(
+            partial(adapt_ta(ta.kdj), length=9, signal=3, output_idx=2), 
+            self.data, 
+            overlay=True
+        )
 
     def next(self):
         if len(self.data.Close) < 3:  # 確保有足夠的歷史數據
