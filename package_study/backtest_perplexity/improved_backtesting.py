@@ -3,8 +3,6 @@ from backtesting import Backtest, Strategy
 from backtesting.lib import crossover
 from backtesting.test import GOOG  # 雿輻鍂�批遣皜祈岫鞈��
 import pandas_ta as ta
-import pandas as pd
-import numpy as np
 from functools import partial
 
 
@@ -193,7 +191,7 @@ class ImprovedMacdRsiKdjStrategy(Strategy):
 
 
 class OriginalMacdRsiKdjStrategy(Strategy):
-    """�笔�蝑𣇉裦�冽䲰撠齿�"""
+    """原始的MACD、RSI、KDJ策略"""
     rsi_length = 14
     kdj_length, kdj_signal = 9, 3
 
