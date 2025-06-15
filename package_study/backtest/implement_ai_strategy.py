@@ -34,6 +34,7 @@ class MacdRsiKdjStrategy(Strategy):
     rsi_length = 14
     # KDJ 參數
     kdj_length, kdj_signal = 9, 3
+    kelly_ratio = 0.3
 
     def init(self):
         self.macd_hist = self.I(
@@ -78,10 +79,12 @@ class MacdRsiKdjStrategy(Strategy):
 
         # 交易邏輯
         if not self.position:
-            if bullish_macd and bullish_rsi and bullish_kdj:
-                self.buy()
-            elif bearish_macd and bearish_rsi and bearish_kdj:
-                self.sell()
+            size = (self.kelly_ratio * self.equity) / self.data.Close[-1]
+            size = max(round(size), 1)
+            if sum(map(int, [bullish_macd, bullish_rsi, bullish_kdj])) >= 3:
+                self.buy(size=size)
+            elif sum(map(int, [bearish_macd, bearish_rsi, bearish_kdj])) >= 3:
+                self.sell(size=size)
         else:
             if self.position.is_long and (bearish_kdj or self.rsi[-1] > 70):
                 self.position.close()
@@ -93,15 +96,34 @@ if __name__ == '__main__':
         GOOG,
         MacdRsiKdjStrategy,
         cash=10000,
-        commission=0.002,
-        exclusive_orders=True
+        commission=0.0001, # 手續費率 
+        spread=0.0005,
+        hedging=False, # 是否開啟當沖交易，若無開啟（會依據先進先出法買賣股票），日內交易時才要設置
+        trade_on_close=False,  # 是否在收盤時交易
+        exclusive_orders=True, # 是否排除重複訂單
+        finalize_trades=True,  # 是否在回測結束時自動平倉
     )
 
-    output = bt.run()
-    # bt.plot()
-    print(output)
-    # This code is not winning
-    print(output['_trades'].to_string())
+    stats = bt.run()
+    print(stats)
+    trades = stats['_trades']
+    print(trades)
+    print('number of trades:', len(trades))
+    price_paid = trades['Size'] * trades['EntryPrice']
+    total_invest = price_paid.sum()
+    print('Total invested:', total_invest)
+
+    equity = trades['Size'] * trades['ExitPrice']
+    total_equity = equity.sum()
+    print('Total equity:', total_equity)
+    print('Earning:', (total_equity - total_invest)/ total_invest * 100, '%')
+    bt.plot(
+        plot_return=True, 
+        plot_pl=True, 
+        plot_volume=True, 
+        plot_drawdown=True, 
+        superimpose=False
+    )
 
 """
 策略特點分析

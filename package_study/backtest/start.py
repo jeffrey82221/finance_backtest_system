@@ -35,8 +35,9 @@ class DCA(Strategy):
             num_of_shares_per_buy: int = math.floor(self.amount_to_invest / self.data.Close[-1])
             self.total_shares_bought += num_of_shares_per_buy
             ic(self.buy(
-                size = num_of_shares_per_buy
-                # tp = self.data.Close[-1] * 1.2,  # Take profit at 5% above the buy price
+                size = num_of_shares_per_buy,
+                tp = self.data.Close[-1] * 1.5,  # Take profit at 5% above the buy price
+                sl = self.data.Close[-1] * 0.8,  # Stop loss at 20% below the buy price
             ))
             ic(self.total_shares_bought)
             
@@ -52,7 +53,7 @@ bt = Backtest(
     spread=0.0005,
     hedging=False, # 是否開啟當沖交易，若無開啟（會依據先進先出法買賣股票），日內交易時才要設置
     trade_on_close=False,  # 是否在收盤時交易
-    exclusive_orders=False, # 是否排除重複訂單
+    exclusive_orders=True, # 是否排除重複訂單
     finalize_trades=True,  # 是否在回測結束時自動平倉
     )
 stats: backtesting._stats._Stats = bt.run()
