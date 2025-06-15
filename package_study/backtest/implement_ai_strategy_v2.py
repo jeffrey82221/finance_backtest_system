@@ -68,19 +68,19 @@ class MacdRsiKdjStrategy(Strategy):
         
         # 多頭條件
         bullish_macd = (self.macd_hist[-1] > 0) and (self.macd_hist[-1] > self.macd_hist[-2])
-        bullish_rsi = (self.rsi[-1] < 50) and (self.data.Close[-3] < self.data.Close[-2] < self.data.Close[-1])
+        bullish_rsi = (self.rsi[-1] < 50) and (self.data.Close[-2] < self.data.Close[-1])
         bullish_kdj = crossover(self.k, self.d) and (self.j[-1] < 80)
         
         # 空頭條件
         bearish_macd = (self.macd_hist[-1] < 0) and (self.macd_hist[-1] > self.macd_hist[-2])
-        bearish_rsi = (self.rsi[-1] > 50) and (self.data.Close[-3] > self.data.Close[-2] > self.data.Close[-1])
+        bearish_rsi = (self.rsi[-1] > 50) and (self.data.Close[-2] > self.data.Close[-1])
         bearish_kdj = crossover(self.d, self.k) and (self.j[-1] > 20)
 
         # 交易邏輯
         if not self.position:
-            if bullish_macd and bullish_rsi and bullish_kdj:
+            if bullish_macd and bullish_rsi: # and bullish_kdj
                 self.buy()
-            elif bearish_macd and bearish_rsi and bearish_kdj:
+            elif bearish_macd and bearish_rsi: # and bearish_kdj
                 self.sell()
         else:
             if self.position.is_long and (bearish_kdj or self.rsi[-1] > 70):
@@ -92,9 +92,12 @@ if __name__ == '__main__':
     bt = Backtest(
         GOOG,
         MacdRsiKdjStrategy,
-        cash=10000,
-        commission=0.002,
-        exclusive_orders=True
+        cash=10000, # 初始資金
+        commission=0.002, # 手續費率 (若要考慮滑價成本，可以提高手續費率，讓回測更穩健)
+        margin=1,  # 槓桿交易比例 (0~1之間)，0.2代表 5倍槓桿
+        hedging=False, # 是否開啟當沖交易，若無開啟（會依據先進先出法買賣股票），日內交易時才要設置
+        trade_on_close=False,  # 是否在收盤時交易
+        exclusive_orders=True # 是否排除重複訂單
     )
 
     output = bt.run()
